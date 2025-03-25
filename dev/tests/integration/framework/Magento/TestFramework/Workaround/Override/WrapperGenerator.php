@@ -48,7 +48,7 @@ class WrapperGenerator
             ->setImplementedInterfaces([SkippableInterface::class])
             ->addTrait('\\' . SkippableTrait::class)
             ->generate();
-        // phpcs:ignore Squiz.PHP.Eval
+        // phpcs:ignore Squiz.PHP.Eval,Magento2.Security.InsecureFunction
         eval($wrapperCode);
 
         return $class->getName() . '\\' . self::SKIPPABLE_SUFFIX;
