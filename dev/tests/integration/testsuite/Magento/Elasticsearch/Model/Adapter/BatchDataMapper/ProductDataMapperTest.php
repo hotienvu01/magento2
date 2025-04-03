@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2015 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -69,7 +69,6 @@ class ProductDataMapperTest extends TestCase
      * @magentoDataFixture Magento/Catalog/_files/product_simple.php
      * @magentoDataFixture Magento/Store/_files/second_store.php
      * @magentoDataFixture Magento/Elasticsearch/_files/select_attribute_store_labels.php
-     * @magentoConfigFixture default/catalog/search/engine elasticsearch
      */
     public function testMapSelectAttributeWithDifferentStoreLabels(): void
     {

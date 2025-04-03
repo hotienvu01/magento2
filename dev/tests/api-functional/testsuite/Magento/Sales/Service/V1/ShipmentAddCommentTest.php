@@ -3,30 +3,32 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\Sales\Service\V1;
 
 use Magento\Sales\Api\Data\ShipmentCommentInterface;
 use Magento\TestFramework\TestCase\WebapiAbstract;
 
 /**
- * Class ShipmentAddCommentTest
+ * Functional Test Class ShipmentAddCommentTest
  */
 class ShipmentAddCommentTest extends WebapiAbstract
 {
     /**
      * Service read name
      */
-    const SERVICE_READ_NAME = 'salesShipmentCommentRepositoryV1';
+    public const SERVICE_READ_NAME = 'salesShipmentCommentRepositoryV1';
 
     /**
      * Service version
      */
-    const SERVICE_VERSION = 'V1';
+    public const SERVICE_VERSION = 'V1';
 
     /**
      * Shipment increment id
      */
-    const SHIPMENT_INCREMENT_ID = '100000001';
+    public const SHIPMENT_INCREMENT_ID = '100000001';
 
     /**
      * @var \Magento\Framework\ObjectManagerInterface

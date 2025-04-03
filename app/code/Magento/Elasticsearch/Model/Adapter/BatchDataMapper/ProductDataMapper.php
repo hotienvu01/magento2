@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2015 Adobe
+ * All Rights Reserved.
  */
 
 namespace Magento\Elasticsearch\Model\Adapter\BatchDataMapper;
@@ -370,8 +370,11 @@ class ProductDataMapper implements BatchDataMapperInterface
             return $attributeLabels;
         }
 
+        // array_flip() + foreach { isset() }  is much faster than foreach { in_array() } when there are many options
+        $attributeValues = array_flip($attributeValues);
+
         foreach ($options as $option) {
-            if (\in_array($option['value'], $attributeValues)) {
+            if (isset($attributeValues[$option['value']])) {
                 $attributeLabels[] = $option['label'];
             }
         }

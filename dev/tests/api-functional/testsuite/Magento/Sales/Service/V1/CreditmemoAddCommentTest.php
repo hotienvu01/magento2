@@ -3,30 +3,32 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\Sales\Service\V1;
 
 use Magento\Sales\Api\Data\CreditmemoCommentInterface as Comment;
 use Magento\TestFramework\TestCase\WebapiAbstract;
 
 /**
- * Class CreditmemoAddCommentTest
+ * Functional Test Class CreditmemoAddCommentTest
  */
 class CreditmemoAddCommentTest extends WebapiAbstract
 {
     /**
      * Service read name
      */
-    const SERVICE_READ_NAME = 'salesCreditmemoCommentRepositoryV1';
+    public const SERVICE_READ_NAME = 'salesCreditmemoCommentRepositoryV1';
 
     /**
      * Service version
      */
-    const SERVICE_VERSION = 'V1';
+    public const SERVICE_VERSION = 'V1';
 
     /**
      * Creditmemo increment id
      */
-    const CREDITMEMO_INCREMENT_ID = '100000001';
+    public const CREDITMEMO_INCREMENT_ID = '100000001';
 
     /**
      * @var \Magento\Framework\ObjectManagerInterface
