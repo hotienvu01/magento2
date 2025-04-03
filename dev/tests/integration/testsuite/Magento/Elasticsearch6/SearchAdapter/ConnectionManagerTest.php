@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\Elasticsearch6\SearchAdapter;
 
-use Magento\Elasticsearch\Elasticsearch5\SearchAdapter\ConnectionManager;
+use Magento\Elasticsearch\SearchAdapter\ConnectionManager;
 use Magento\TestFramework\Helper\Bootstrap;
 
 /**
@@ -29,6 +29,7 @@ class ConnectionManagerTest extends \PHPUnit\Framework\TestCase
     {
         $this->objectManager = Bootstrap::getObjectManager();
 
+        // phpstan:ignore "Class Magento\Elasticsearch\SearchAdapter\ConnectionManager not found."
         $this->connectionManager = $this->objectManager->create(ConnectionManager::class);
     }
 

@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2015 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -135,7 +135,7 @@ class AttributeAdapter
     public function isComplexType(): bool
     {
         return in_array($this->getAttribute()->getFrontendInput(), ['select', 'multiselect'], true)
-            || $this->getAttribute()->usesSource();
+            || ($this->getAttribute()->usesSource() && $this->getAttribute()->getFrontendInput() !== 'boolean');
     }
 
     /**
