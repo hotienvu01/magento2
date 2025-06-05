@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2015 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -10,7 +10,7 @@ namespace Magento\Elasticsearch\Catalog\Controller\Adminhtml\Product\Attribute;
 use Magento\Catalog\Controller\Adminhtml\Product\Attribute\Save\AbstractSaveAttributeTest;
 
 /**
- * Test cases related to creating attribute and elasticsearch.
+ * Test cases related to creating attribute and search engine.
  */
 class SaveTest extends AbstractSaveAttributeTest
 {

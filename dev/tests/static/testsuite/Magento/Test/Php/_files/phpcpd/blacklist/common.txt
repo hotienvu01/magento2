@@ -111,3 +111,5 @@ app/code/Magento/Newsletter/Model/Queue/TransportBuilder.php
 app/code/Magento/ConfigurableProduct/view/adminhtml/templates/catalog/product/edit/attribute/steps/bulk.phtml
 app/code/Magento/GoogleGtag
 app/code/Magento/AdminAdobeIms/Observer/AuthObserver
+app/code/Magento/OpenSearch/SearchAdapter/Adapter
+app/code/Magento/WebapiAsync/Controller/Rest/Asynchronous/InputParamsResolver.php
