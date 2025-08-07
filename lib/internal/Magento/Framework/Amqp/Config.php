@@ -204,12 +204,22 @@ class Config
     private function closeConnection()
     {
         if (isset($this->channel)) {
-            $this->channel->close();
+            try {
+                $this->channel->close();
+                // phpcs:ignore Magento2.CodeAnalysis.EmptyBlock.DetectedCatch
+            } catch (\PhpAmqpLib\Exception\AMQPConnectionClosedException $e) {
+                // Connection is already closed, ignore the exception during cleanup
+            }
             unset($this->channel);
         }
 
         if (isset($this->connection)) {
-            $this->connection->close();
+            try {
+                $this->connection->close();
+                // phpcs:ignore Magento2.CodeAnalysis.EmptyBlock.DetectedCatch
+            } catch (\PhpAmqpLib\Exception\AMQPConnectionClosedException $e) {
+                // Connection is already closed, ignore the exception during cleanup
+            }
             unset($this->connection);
         }
     }
