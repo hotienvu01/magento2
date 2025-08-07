@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2023 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -177,6 +177,11 @@ class QuoteManagement implements CartManagementInterface
     private $remoteAddress;
 
     /**
+     * @var CartMutexInterface|null
+     */
+    private ?CartMutexInterface $cartMutex;
+
+    /**
      * @param EventManager $eventManager
      * @param SubmitQuoteValidator $submitQuoteValidator
      * @param OrderFactory $orderFactory
@@ -200,7 +205,8 @@ class QuoteManagement implements CartManagementInterface
      * @param QuoteIdMaskFactory|null $quoteIdMaskFactory
      * @param AddressRepositoryInterface|null $addressRepository
      * @param RequestInterface|null $request
-     * @param RemoteAddress $remoteAddress
+     * @param RemoteAddress|null $remoteAddress
+     * @param CartMutexInterface|null $cartMutex
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
@@ -227,7 +233,8 @@ class QuoteManagement implements CartManagementInterface
         QuoteIdMaskFactory $quoteIdMaskFactory = null,
         AddressRepositoryInterface $addressRepository = null,
         RequestInterface $request = null,
-        RemoteAddress $remoteAddress = null
+        RemoteAddress $remoteAddress = null,
+        ?CartMutexInterface $cartMutex = null
     ) {
         $this->eventManager = $eventManager;
         $this->submitQuoteValidator = $submitQuoteValidator;
@@ -257,6 +264,8 @@ class QuoteManagement implements CartManagementInterface
             ->get(RequestInterface::class);
         $this->remoteAddress = $remoteAddress ?: ObjectManager::getInstance()
             ->get(RemoteAddress::class);
+        $this->cartMutex = $cartMutex
+            ?? ObjectManager::getInstance()->get(CartMutexInterface::class);
     }
 
     /**
@@ -382,10 +391,29 @@ class QuoteManagement implements CartManagementInterface
 
     /**
      * @inheritdoc
+     */
+    public function placeOrder($cartId, ?PaymentInterface $paymentMethod = null)
+    {
+        return $this->cartMutex->execute(
+            (int)$cartId,
+            \Closure::fromCallable([$this, 'placeOrderRun']),
+            [$cartId, $paymentMethod]
+        );
+    }
+
+    /**
+     * Places an order for a specified cart.
+     *
+     * @param int $cartId The cart ID.
+     * @param PaymentInterface|null $paymentMethod
+     * @return int Order ID.
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
      */
-    public function placeOrder($cartId, PaymentInterface $paymentMethod = null)
+    private function placeOrderRun($cartId, PaymentInterface $paymentMethod = null)
     {
         $quote = $this->quoteRepository->getActive($cartId);
         $customer = $quote->getCustomer();

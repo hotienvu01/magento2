@@ -1,0 +1,58 @@
+<?php
+/**
+ * Copyright 2025 Adobe
+ * All Rights Reserved.
+ */
+
+declare(strict_types=1);
+
+namespace Magento\User\Helper;
+
+use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Helper\Context;
+use Magento\Framework\App\ObjectManager;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Security\Model\ResourceModel\AdminSessionInfo;
+use Magento\Security\Model\AdminSessionInfo as AdminSessionInfoModel;
+
+/**
+ * Update admin user session status to logged out
+ */
+class ForceSignIn extends AbstractHelper
+{
+    /**
+     * @var AdminSessionInfo
+     */
+    private AdminSessionInfo $adminSessionInfo;
+
+    /**
+     * @param Context $context
+     * @param AdminSessionInfo|null $adminSessionInfo
+     */
+    public function __construct(
+        Context $context,
+        AdminSessionInfo $adminSessionInfo = null
+    ) {
+        $this->adminSessionInfo = $adminSessionInfo ?: ObjectManager::getInstance()->get(AdminSessionInfo::class);
+        parent::__construct($context);
+    }
+
+    /**
+     * Update admin_user_session status to logged out
+     *
+     * @param int $userId
+     * @throws LocalizedException
+     */
+    public function updateAdminSessionStatus($userId): void
+    {
+        try {
+            $this->adminSessionInfo->updateStatusByUserId(
+                AdminSessionInfoModel::LOGGED_OUT,
+                $userId,
+                [AdminSessionInfoModel::LOGGED_IN]
+            );
+        } catch (\Exception $e) {
+            throw new LocalizedException(__($e->getMessage()));
+        }
+    }
+}

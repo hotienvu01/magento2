@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
  /**
-  * Copyright © Magento, Inc. All rights reserved.
-  * See COPYING.txt for license details.
+  * Copyright 2019 Adobe
+  * All Rights Reserved.
   */
 -->
 
@@ -16,6 +16,7 @@
             <argument name="attributeCode" type="string" defaultValue="SomeString"/>
         </arguments>
 
+        <scrollTo selector="{{AdminProductFormConfigurationsSection.sectionHeader}}" stepKey="scrollToClickCreateConfigurationsSection" />
         <click selector="{{AdminProductFormConfigurationsSection.createConfigurations}}" stepKey="clickCreateConfigurations"/>
         <click selector="{{AdminCreateProductConfigurationsPanel.filters}}" stepKey="clickFilters"/>
         <fillField selector="{{AdminCreateProductConfigurationsPanel.attributeCode}}" userInput="{{attributeCode}}" stepKey="fillFilterAttributeCodeField"/>

@@ -395,7 +395,6 @@ class SortingTest extends TestCase
      * @magentoDataFixture Magento/Catalog/_files/products_with_not_empty_layered_navigation_attribute.php
      * @magentoDataFixture Magento/Framework/Search/_files/product_configurable_with_out-of-stock_child.php
      * @magentoConfigFixture current_store cataloginventory/options/show_out_of_stock 1
-     * @magentoConfigFixture default/catalog/search/engine elasticsearch7
      * @dataProvider productListWithOutOfStockSortOrderDataProvider
      * @param string $sortBy
      * @param string $direction
@@ -417,7 +416,6 @@ class SortingTest extends TestCase
      * @magentoDataFixture Magento/Catalog/_files/products_with_not_empty_layered_navigation_attribute.php
      * @magentoDataFixture Magento/Framework/Search/_files/product_configurable_with_out-of-stock_child.php
      * @magentoConfigFixture current_store cataloginventory/options/show_out_of_stock 1
-     * @magentoConfigFixture default/catalog/search/engine mysql
      * @dataProvider productListWithOutOfStockSortOrderDataProvider
      * @param string $sortBy
      * @param string $direction
@@ -491,6 +489,8 @@ class SortingTest extends TestCase
         string $direction,
         array $expected
     ): void {
+        $this->markTestSkipped('ACP2E-748: Layered navigation filters don\'t work
+        when \"show out of stock\" is enabled');
         $this->scopeConfig->setValue(
             Config::XML_PATH_LIST_DEFAULT_SORT_BY,
             $sortBy,

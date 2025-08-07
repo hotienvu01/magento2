@@ -909,7 +909,7 @@ class QuoteManagementTest extends TestCase
         $this->checkoutSessionMock->expects($this->once())->method('setLastRealOrderId')->with($orderIncrementId);
         $this->checkoutSessionMock->expects($this->once())->method('setLastOrderStatus')->with($orderStatus);
 
-        $this->assertEquals($orderId, $service->placeOrder($cartId));
+        $this->assertEquals($orderId, $this->invokeMethod($service, 'placeOrderRun', [$cartId]));
     }
 
     /**
@@ -1011,7 +1011,10 @@ class QuoteManagementTest extends TestCase
         $paymentMethod->expects($this->once())->method('setChecks');
         $paymentMethod->expects($this->once())->method('getData')->willReturn(['additional_data' => []]);
 
-        $this->assertEquals($orderId, $service->placeOrder($cartId, $paymentMethod));
+        $this->assertEquals(
+            $orderId,
+            $this->invokeMethod($service, 'placeOrderRun', [$cartId, $paymentMethod])
+        );
     }
 
     /**
@@ -1356,5 +1359,23 @@ class QuoteManagementTest extends TestCase
             true,
             $methods
         );
+    }
+
+    /**
+     * Invokes private method.
+     *
+     * @param $object
+     * @param $methodName
+     * @param array $parameters
+     * @return mixed
+     * @throws \ReflectionException
+     */
+    private function invokeMethod(&$object, $methodName, array $parameters = [])
+    {
+        $reflection = new \ReflectionClass(get_class($object));
+        $method = $reflection->getMethod($methodName);
+        $method->setAccessible(true);
+
+        return $method->invokeArgs($object, $parameters);
     }
 }

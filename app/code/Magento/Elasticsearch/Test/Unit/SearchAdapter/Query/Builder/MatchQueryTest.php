@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2015 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -16,7 +16,6 @@ use Magento\Elasticsearch\SearchAdapter\Query\Builder\MatchQuery as MatchQueryBu
 use Magento\Elasticsearch\SearchAdapter\Query\ValueTransformerInterface;
 use Magento\Elasticsearch\SearchAdapter\Query\ValueTransformerPool;
 use Magento\Framework\Search\Request\Query\MatchQuery;
-use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -39,12 +38,14 @@ class MatchQueryTest extends TestCase
      * @var MatchQueryBuilder
      */
     private $matchQueryBuilder;
+
     /**
-     * @var MockObject
+     * @var Config|MockObject
      */
     private $config;
+
     /**
-     * @var MockObject
+     * @var FieldMapperInterface|MockObject
      */
     private $fieldMapper;
 
@@ -65,16 +66,13 @@ class MatchQueryTest extends TestCase
             ->willReturn($valueTransformerMock);
         $valueTransformerMock->method('transform')
             ->willReturnArgument(0);
-        $this->matchQueryBuilder = (new ObjectManager($this))->getObject(
-            MatchQueryBuilder::class,
-            [
-                'fieldMapper' => $this->fieldMapper,
-                'preprocessorContainer' => [],
-                'attributeProvider' => $this->attributeProvider,
-                'fieldTypeResolver' => $this->fieldTypeResolver,
-                'valueTransformerPool' => $valueTransformerPoolMock,
-                'config' => $this->config,
-            ]
+
+        $this->matchQueryBuilder = new MatchQueryBuilder(
+            $this->fieldMapper,
+            $this->attributeProvider,
+            $this->fieldTypeResolver,
+            $valueTransformerPoolMock,
+            $this->config
         );
     }
 
@@ -182,6 +180,7 @@ class MatchQueryTest extends TestCase
                 ],
                 '2<75%'
             ],
+            //[match_phrase] query does not support [minimum_should_match]
             'match_phrase query with minimum_should_match' => [
                 '"fitness bottle"',
                 [
@@ -196,14 +195,12 @@ class MatchQueryTest extends TestCase
                             'name' => [
                                 'query' => 'fitness bottle',
                                 'boost' => 6,
-                                'minimum_should_match' => '2<75%',
                             ],
                         ],
                     ],
                 ],
                 '2<75%'
             ],
-
         ];
     }
 
@@ -213,47 +210,47 @@ class MatchQueryTest extends TestCase
     public function buildDataProviderForMatchPhrasePrefix()
     {
         return [
-        'match_phrase_prefix query with minimum_should_match' => [
-            '"fitness bottle"',
-            [
+            'match_phrase_prefix query with minimum_should_match' => [
+                '"fitness bottle"',
                 [
-                    'field' => 'name',
-                    'boost' => 5,
-                    'matchCondition' => 'match_phrase_prefix'
-                ]
-            ],
-            [
+                    [
+                        'field' => 'name',
+                        'boost' => 5,
+                        'matchCondition' => 'match_phrase_prefix'
+                    ]
+                ],
                 [
-                    'match_phrase_prefix' => [
-                        'name' => [
-                            'query' => 'fitness bottle',
-                            'boost' => 6
+                    [
+                        'match_phrase_prefix' => [
+                            'name' => [
+                                'query' => 'fitness bottle',
+                                'boost' => 6
+                            ],
                         ],
                     ],
                 ],
+                '2<75%'
             ],
-            '2<75%'
-        ],
-        'match_phrase_prefix query with no minimum_should_match' => [
-            '"fitness bottle"',
-            [
+            'match_phrase_prefix query with no minimum_should_match' => [
+                '"fitness bottle"',
                 [
-                    'field' => 'name',
-                    'boost' => 5,
-                    'matchCondition' => 'match_phrase_prefix'
-                ]
-            ],
-            [
+                    [
+                        'field' => 'name',
+                        'boost' => 5,
+                        'matchCondition' => 'match_phrase_prefix'
+                    ]
+                ],
                 [
-                    'match_phrase_prefix' => [
-                        'name' => [
-                            'query' => 'fitness bottle',
-                            'boost' => 6
+                    [
+                        'match_phrase_prefix' => [
+                            'name' => [
+                                'query' => 'fitness bottle',
+                                'boost' => 6
+                            ],
                         ],
                     ],
-                ],
-            ]
-        ]];
+                ]
+            ]];
     }
 
     /**

@@ -5,9 +5,18 @@
  */
 namespace Magento\Sales\Model\ResourceModel\Order\Shipment;
 
+use Magento\Authorization\Model\UserContextInterface;
+use Magento\Framework\App\ObjectManager;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\Model\ResourceModel\Db\Context;
+use Magento\Framework\Model\ResourceModel\Db\VersionControl\RelationComposite;
+use Magento\Sales\Model\Order\Shipment\Comment\Validator;
+use Magento\Sales\Model\ResourceModel\Attribute;
 use Magento\Sales\Model\ResourceModel\EntityAbstract;
 use Magento\Framework\Model\ResourceModel\Db\VersionControl\Snapshot;
 use Magento\Sales\Model\Spi\ShipmentCommentResourceInterface;
+use Magento\SalesSequence\Model\Manager;
 
 /**
  * Flat sales order shipment comment resource
@@ -17,38 +26,48 @@ use Magento\Sales\Model\Spi\ShipmentCommentResourceInterface;
 class Comment extends EntityAbstract implements ShipmentCommentResourceInterface
 {
     /**
-     * Event prefix
+     * Model Event prefix
      *
      * @var string
      */
     protected $_eventPrefix = 'sales_order_shipment_comment_resource';
 
     /**
-     * Validator
+     * Class Validator
      *
-     * @var \Magento\Sales\Model\Order\Shipment\Comment\Validator
+     * @var Validator
      */
     protected $validator;
 
     /**
-     * @param \Magento\Framework\Model\ResourceModel\Db\Context $context
-     * @param \Magento\Sales\Model\ResourceModel\Attribute $attribute
-     * @param \Magento\SalesSequence\Model\Manager $sequenceManager
+     * Class User Context
+     *
+     * @var UserContextInterface
+     */
+    private UserContextInterface $userContext;
+
+    /**
+     * @param Context $context
      * @param Snapshot $entitySnapshot
-     * @param \Magento\Framework\Model\ResourceModel\Db\VersionControl\RelationComposite $entityRelationComposite
-     * @param \Magento\Sales\Model\Order\Shipment\Comment\Validator $validator
+     * @param RelationComposite $entityRelationComposite
+     * @param Attribute $attribute
+     * @param Manager $sequenceManager
+     * @param Validator $validator
      * @param string $connectionName
+     * @param UserContextInterface|null $userContext
      */
     public function __construct(
-        \Magento\Framework\Model\ResourceModel\Db\Context $context,
+        Context $context,
         Snapshot $entitySnapshot,
-        \Magento\Framework\Model\ResourceModel\Db\VersionControl\RelationComposite $entityRelationComposite,
-        \Magento\Sales\Model\ResourceModel\Attribute $attribute,
-        \Magento\SalesSequence\Model\Manager $sequenceManager,
-        \Magento\Sales\Model\Order\Shipment\Comment\Validator $validator,
-        $connectionName = null
+        RelationComposite $entityRelationComposite,
+        Attribute $attribute,
+        Manager $sequenceManager,
+        Validator $validator,
+        $connectionName = null,
+        UserContextInterface $userContext = null
     ) {
         $this->validator = $validator;
+        $this->userContext = $userContext ?? ObjectManager::getInstance()->get(UserContextInterface::class);
         parent::__construct(
             $context,
             $entitySnapshot,
@@ -72,25 +91,64 @@ class Comment extends EntityAbstract implements ShipmentCommentResourceInterface
     /**
      * Performs validation before save
      *
-     * @param \Magento\Framework\Model\AbstractModel $object
+     * @param AbstractModel $object
      * @return $this
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
-    protected function _beforeSave(\Magento\Framework\Model\AbstractModel $object)
+    protected function _beforeSave(AbstractModel $object)
     {
         /** @var \Magento\Sales\Model\Order\Shipment\Comment $object */
         if (!$object->getParentId() && $object->getShipment()) {
             $object->setParentId($object->getShipment()->getId());
         }
 
+        if ($object->getId()) {
+            $this->getCommentById($object);
+        }
+
         parent::_beforeSave($object);
         $errors = $this->validator->validate($object);
         if (!empty($errors)) {
-            throw new \Magento\Framework\Exception\LocalizedException(
+            throw new LocalizedException(
                 __("Cannot save comment:\n%1", implode("\n", $errors))
             );
         }
 
+        $this->setUserDetailsToComment($object);
+
         return $this;
+    }
+
+    /**
+     * Set user details to sales entity comment
+     *
+     * @param AbstractModel $salesEntityComment
+     * @return void
+     */
+    public function setUserDetailsToComment(AbstractModel $salesEntityComment): void
+    {
+        $salesEntityComment->setData('user_id', $this->userContext->getUserId());
+        $salesEntityComment->setData('user_type', $this->userContext->getUserType());
+    }
+
+    /**
+     * Fetch comment by id
+     *
+     * @param AbstractModel $commentObject
+     * @return void
+     */
+    private function getCommentById(AbstractModel $commentObject): void
+    {
+        $table = $this->getMainTable();
+        $query = $this->getConnection()->select()
+            ->from($table, ['user_id','user_type'])
+            ->where('parent_id = ?', $commentObject->getParentId())
+            ->where('entity_id = ?', $commentObject->getId());
+        $result = $this->getConnection()->fetchRow($query);
+
+        if (!empty($result)) {
+            $commentObject->setData('user_id', $result['user_id']);
+            $commentObject->setData('user_type', $result['user_type']);
+        }
     }
 }
