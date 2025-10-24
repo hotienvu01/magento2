@@ -124,10 +124,8 @@ class QuoteAddressValidator
     {
         // If cart has a customer ID, use it regardless of the is_guest flag
         // This handles cases where the flags are out of sync
-        $customerId = $cart->getCustomer()->getId();
-        if (!$customerId) {
-            $customerId = null;
-        }
+        $customer = $cart->getCustomer();
+        $customerId = $customer ? $customer->getId() : null;
         
         $this->doValidate($address, $customerId ? (int) $customerId : null);
     }
