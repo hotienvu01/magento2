@@ -128,7 +128,8 @@ class QuoteAddressValidator
         if ($cart instanceof Quote) {
             $customerId = $cart->getCustomerId();
         } elseif (!$cart->getCustomerIsGuest()) {
-            $customerId = $cart->getCustomer()->getId();
+            $customer = $cart->getCustomer();
+            $customerId = $customer ? $customer->getId() : null;
         }
         
         $this->doValidate($address, $customerId ? (int) $customerId : null);
