@@ -48,7 +48,7 @@ class TotalsCollectorPlugin
         if ($quote->hasItemsCollection()) {
             $quote->unsetData('items_collection');
         }
-        
+
         return [$quote];
     }
 
