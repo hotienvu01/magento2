@@ -122,7 +122,14 @@ class QuoteAddressValidator
      */
     public function validateForCart(CartInterface $cart, AddressInterface $address): void
     {
-        $this->doValidate($address, $cart->getCustomerIsGuest() ? null : (int) $cart->getCustomer()->getId());
+        // If cart has a customer ID, use it regardless of the is_guest flag
+        // This handles cases where the flags are out of sync
+        $customerId = $cart->getCustomer()->getId();
+        if (!$customerId) {
+            $customerId = null;
+        }
+        
+        $this->doValidate($address, $customerId ? (int) $customerId : null);
     }
 
     /**
