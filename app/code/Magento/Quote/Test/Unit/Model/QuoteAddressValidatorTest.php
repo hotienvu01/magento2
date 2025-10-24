@@ -15,6 +15,7 @@ use Magento\Customer\Model\Session;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Api\Data\AddressInterface;
 use Magento\Quote\Api\Data\CartInterface;
+use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\QuoteAddressValidator;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -75,7 +76,8 @@ class QuoteAddressValidatorTest extends TestCase
         $customerId = 123;
         $customerAddressId = 456;
 
-        $cartMock = $this->getMockBuilder(CartInterface::class)
+        $cartMock = $this->getMockBuilder(Quote::class)
+            ->disableOriginalConstructor()
             ->getMock();
 
         $customerMock = $this->getMockBuilder(CustomerInterface::class)
@@ -88,13 +90,9 @@ class QuoteAddressValidatorTest extends TestCase
             ->getMock();
 
         // Set up cart to have a customer ID
-        $customerMock->expects($this->once())
-            ->method('getId')
-            ->willReturn($customerId);
-
         $cartMock->expects($this->once())
-            ->method('getCustomer')
-            ->willReturn($customerMock);
+            ->method('getCustomerId')
+            ->willReturn($customerId);
 
         // Set up address with customer address ID
         $addressMock->expects($this->once())
@@ -129,23 +127,17 @@ class QuoteAddressValidatorTest extends TestCase
      */
     public function testValidateForCartWithGuestCart()
     {
-        $cartMock = $this->getMockBuilder(CartInterface::class)
-            ->getMock();
-
-        $customerMock = $this->getMockBuilder(CustomerInterface::class)
+        $cartMock = $this->getMockBuilder(Quote::class)
+            ->disableOriginalConstructor()
             ->getMock();
 
         $addressMock = $this->getMockBuilder(AddressInterface::class)
             ->getMock();
 
         // Set up cart without customer ID (guest)
-        $customerMock->expects($this->once())
-            ->method('getId')
-            ->willReturn(null);
-
         $cartMock->expects($this->once())
-            ->method('getCustomer')
-            ->willReturn($customerMock);
+            ->method('getCustomerId')
+            ->willReturn(null);
 
         // Address should not have customer address ID for guest
         $addressMock->expects($this->once())
@@ -166,23 +158,17 @@ class QuoteAddressValidatorTest extends TestCase
 
         $customerAddressId = 456;
 
-        $cartMock = $this->getMockBuilder(CartInterface::class)
-            ->getMock();
-
-        $customerMock = $this->getMockBuilder(CustomerInterface::class)
+        $cartMock = $this->getMockBuilder(Quote::class)
+            ->disableOriginalConstructor()
             ->getMock();
 
         $addressMock = $this->getMockBuilder(AddressInterface::class)
             ->getMock();
 
         // Set up cart without customer ID (guest)
-        $customerMock->expects($this->once())
-            ->method('getId')
-            ->willReturn(null);
-
         $cartMock->expects($this->once())
-            ->method('getCustomer')
-            ->willReturn($customerMock);
+            ->method('getCustomerId')
+            ->willReturn(null);
 
         // Address has customer address ID even though cart is guest
         $addressMock->expects($this->once())
@@ -205,7 +191,8 @@ class QuoteAddressValidatorTest extends TestCase
         $customerAddressId = 456;
         $differentAddressId = 789;
 
-        $cartMock = $this->getMockBuilder(CartInterface::class)
+        $cartMock = $this->getMockBuilder(Quote::class)
+            ->disableOriginalConstructor()
             ->getMock();
 
         $customerMock = $this->getMockBuilder(CustomerInterface::class)
@@ -218,13 +205,9 @@ class QuoteAddressValidatorTest extends TestCase
             ->getMock();
 
         // Set up cart with customer ID
-        $customerMock->expects($this->once())
-            ->method('getId')
-            ->willReturn($customerId);
-
         $cartMock->expects($this->once())
-            ->method('getCustomer')
-            ->willReturn($customerMock);
+            ->method('getCustomerId')
+            ->willReturn($customerId);
 
         // Address has customer address ID
         $addressMock->expects($this->once())
