@@ -46,8 +46,34 @@ class TotalsCollectorPluginTest extends TestCase
         $this->plugin = new TotalsCollectorPlugin($this->totalsCollectionState);
     }
 
-    public function testBeforeCollectSetsState()
+    public function testBeforeCollectSetsStateAndClearsCache()
     {
+        $this->quote->expects($this->once())
+            ->method('hasItemsCollection')
+            ->willReturn(true);
+
+        $this->quote->expects($this->once())
+            ->method('unsetData')
+            ->with('items_collection');
+
+        $this->totalsCollectionState->expects($this->once())
+            ->method('setIsCollecting')
+            ->with(true);
+
+        $result = $this->plugin->beforeCollect($this->totalsCollector, $this->quote);
+
+        $this->assertEquals([$this->quote], $result);
+    }
+
+    public function testBeforeCollectSetsStateWithoutClearingCacheIfNotSet()
+    {
+        $this->quote->expects($this->once())
+            ->method('hasItemsCollection')
+            ->willReturn(false);
+
+        $this->quote->expects($this->never())
+            ->method('unsetData');
+
         $this->totalsCollectionState->expects($this->once())
             ->method('setIsCollecting')
             ->with(true);

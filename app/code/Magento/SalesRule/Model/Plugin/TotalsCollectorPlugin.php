@@ -30,7 +30,10 @@ class TotalsCollectorPlugin
     }
 
     /**
-     * Set flag before totals collection starts
+     * Set flag before totals collection starts and ensure items are reloaded
+     *
+     * Forces quote items collection to be reloaded to ensure salesrule attributes
+     * are included when totals collection requires them.
      *
      * @param TotalsCollector $subject
      * @param Quote $quote
@@ -40,6 +43,12 @@ class TotalsCollectorPlugin
     public function beforeCollect(TotalsCollector $subject, Quote $quote): array
     {
         $this->totalsCollectionState->setIsCollecting(true);
+        
+        // Force reload of items collection to ensure salesrule attributes are loaded
+        if ($quote->hasItemsCollection()) {
+            $quote->unsetData('items_collection');
+        }
+        
         return [$quote];
     }
 
