@@ -54,9 +54,6 @@
     <type name="Magento\Quote\Model\Quote\Config">
         <plugin name="append_sales_rule_keys_to_quote" type="Magento\SalesRule\Model\Plugin\QuoteConfigProductAttributes"/>
     </type>
-    <type name="Magento\Quote\Model\Quote\TotalsCollector">
-        <plugin name="track_totals_collection_state" type="Magento\SalesRule\Model\Plugin\TotalsCollectorPlugin"/>
-    </type>
     <type name="Magento\Framework\Module\Setup\Migration">
         <arguments>
             <argument name="compositeModules" xsi:type="array">

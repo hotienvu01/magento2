@@ -7,10 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\SalesRule\Test\Unit\Model\Plugin;
 
+use Magento\Framework\App\CacheInterface;
+use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use Magento\Quote\Model\Quote\Config;
 use Magento\SalesRule\Model\Plugin\QuoteConfigProductAttributes;
-use Magento\SalesRule\Model\Quote\TotalsCollectionState;
 use Magento\SalesRule\Model\ResourceModel\Rule;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -18,7 +19,7 @@ use PHPUnit\Framework\TestCase;
 class QuoteConfigProductAttributesTest extends TestCase
 {
     /**
-     * @var QuoteConfigProductAttributes|MockObject
+     * @var QuoteConfigProductAttributes
      */
     protected $plugin;
 
@@ -28,34 +29,66 @@ class QuoteConfigProductAttributesTest extends TestCase
     protected $ruleResource;
 
     /**
-     * @var TotalsCollectionState|MockObject
+     * @var CacheInterface|MockObject
      */
-    protected $totalsCollectionState;
+    protected $cache;
+
+    /**
+     * @var SerializerInterface|MockObject
+     */
+    protected $serializer;
 
     protected function setUp(): void
     {
         $objectManager = new ObjectManager($this);
         $this->ruleResource = $this->createMock(Rule::class);
-        $this->totalsCollectionState = $this->createMock(TotalsCollectionState::class);
+        $this->cache = $this->createMock(CacheInterface::class);
+        $this->serializer = $this->createMock(SerializerInterface::class);
 
         $this->plugin = $objectManager->getObject(
             QuoteConfigProductAttributes::class,
             [
                 'ruleResource' => $this->ruleResource,
-                'totalsCollectionState' => $this->totalsCollectionState
+                'cache' => $this->cache,
+                'serializer' => $this->serializer
             ]
         );
     }
 
-    public function testAfterGetProductAttributes()
+    public function testAfterGetProductAttributesWithCache()
     {
         $subject = $this->createMock(Config::class);
         $attributeCode = 'code of the attribute';
         $expected = [0 => $attributeCode];
+        $serializedData = '["' . $attributeCode . '"]';
 
-        $this->totalsCollectionState->expects($this->once())
-            ->method('isCollecting')
-            ->willReturn(true);
+        $this->cache->expects($this->once())
+            ->method('load')
+            ->with('salesrule_active_product_attributes')
+            ->willReturn($serializedData);
+
+        $this->serializer->expects($this->once())
+            ->method('unserialize')
+            ->with($serializedData)
+            ->willReturn([$attributeCode]);
+
+        $this->ruleResource->expects($this->never())
+            ->method('getActiveAttributes');
+
+        $this->assertEquals($expected, $this->plugin->afterGetProductAttributes($subject, []));
+    }
+
+    public function testAfterGetProductAttributesWithoutCache()
+    {
+        $subject = $this->createMock(Config::class);
+        $attributeCode = 'code of the attribute';
+        $expected = [0 => $attributeCode];
+        $serializedData = '["' . $attributeCode . '"]';
+
+        $this->cache->expects($this->once())
+            ->method('load')
+            ->with('salesrule_active_product_attributes')
+            ->willReturn(false);
 
         $this->ruleResource->expects($this->once())
             ->method('getActiveAttributes')
@@ -65,21 +98,15 @@ class QuoteConfigProductAttributesTest extends TestCase
                 ]
             );
 
+        $this->serializer->expects($this->once())
+            ->method('serialize')
+            ->with([$attributeCode])
+            ->willReturn($serializedData);
+
+        $this->cache->expects($this->once())
+            ->method('save')
+            ->with($serializedData, 'salesrule_active_product_attributes', ['salesrule']);
+
         $this->assertEquals($expected, $this->plugin->afterGetProductAttributes($subject, []));
-    }
-
-    public function testAfterGetProductAttributesNotCollecting()
-    {
-        $subject = $this->createMock(Config::class);
-        $inputAttributes = ['existing_attribute'];
-
-        $this->totalsCollectionState->expects($this->once())
-            ->method('isCollecting')
-            ->willReturn(false);
-
-        $this->ruleResource->expects($this->never())
-            ->method('getActiveAttributes');
-
-        $this->assertEquals($inputAttributes, $this->plugin->afterGetProductAttributes($subject, $inputAttributes));
     }
 }
