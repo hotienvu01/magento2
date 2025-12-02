@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kyosm-ec-web
+  namespace: customer-service
+  labels:
+    app: kyosm-ec-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kyosm-ec-web
+  template:
+    metadata:
+      labels:
+        app: kyosm-ec-web
+    spec:
+      containers:
+        - name: kyosm-container
+          image: 192.168.1.10:30004/kyosm-ec-web:latest  # replace with ${IMAGE_PATH}:${IMAGE_TAG} in pipeline
+          ports:
+            - containerPort: 80
+          env:
+            - name: MAGENTO_RUN_MODE
+              value: "production"
+          resources:
+            requests:
+              cpu: "2"           # request 2 CPU cores
+              memory: "2Gi"      # request 2 GiB RAM
+            limits:
+              cpu: "2"           # optionally cap at 2 cores (or higher if you want burst)
+              memory: "2Gi"      # cap at 4 GiB RAM
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kyosm-web-service
+  namespace: customer-service
+spec:
+  type: NodePort
+  selector:
+    app: kyosm-ec-web
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 32767
