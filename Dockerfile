@@ -4,17 +4,17 @@ FROM php:8.2-apache
 RUN apt-get update && apt-get install -y \
     git unzip curl \
     libpng-dev libjpeg-dev libfreetype6-dev \
-    libonig-dev libzip-dev \
-    libicu-dev libxslt1-dev libxml2-dev \
-    libevent-dev \
+    libzip-dev libicu-dev libxslt1-dev libxml2-dev \
+    libonig-dev libevent-dev \
+    libssl-dev libz-dev \
     && docker-php-ext-install \
-        pdo_mysql mbstring gd zip opcache intl bcmath soap xsl sockets
+        pdo_mysql mbstring gd zip intl bcmath soap xsl sockets ftp
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- \
     --install-dir=/usr/local/bin --filename=composer
 
-# Enable Apache mod_rewrite
+# Enable mod_rewrite
 RUN a2enmod rewrite
 
 WORKDIR /var/www/html
@@ -28,5 +28,4 @@ RUN composer install --no-dev --optimize-autoloader
 # Fix permissions
 RUN chown -R www-data:www-data /var/www/html
 
-EXPOSE 80
 CMD ["apache2-foreground"]
