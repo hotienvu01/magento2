@@ -22,6 +22,17 @@ WORKDIR /var/www/html
 # Copy Magento source
 COPY . .
 
+# Improve Composer behaviour in CI
+RUN apt-get update && apt-get install -y git openssh-client \
+    && mkdir -p /root/.ssh \
+    && ssh-keyscan github.com >> /root/.ssh/known_hosts
+
+RUN composer config --global preferred-install dist \
+    && composer config --global process-timeout 2000 \
+    && composer config --global secure-http false \
+    && composer config --global github-protocols https \
+    && composer config -g repos.packagist composer https://mirrors.aliyun.com/composer/
+
 # Install Magento dependencies
 RUN composer install --no-dev --optimize-autoloader
 
