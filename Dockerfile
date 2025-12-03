@@ -24,7 +24,11 @@ WORKDIR /app
 COPY composer.json composer.lock /app/
 
 # Use composer to install dependencies (no dev dependencies)
-RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-scripts
+# RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-scripts
+
+# use cache mount for composer cache
+RUN --mount=type=cache,target=/root/.composer/cache \
+    composer install --no-dev --prefer-dist --optimize-autoloader --no-scripts
 
 # Copy rest of code (Magento source, modules, etc.)
 COPY . /app
