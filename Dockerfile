@@ -6,13 +6,16 @@ FROM php:8.2-cli AS builder
 # Install system dependencies and PHP extensions required to build & run Magento
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        git unzip curl \
+        git unzip curl openssh-client \
         libpng-dev libjpeg-dev libfreetype6-dev \
         libzip-dev libicu-dev libxslt1-dev libxml2-dev \
         libonig-dev libevent-dev libssl-dev zlib1g-dev \
     && docker-php-ext-install \
         pdo_mysql mbstring gd zip intl bcmath soap xsl sockets ftp \
     && rm -rf /var/lib/apt/lists/*
+
+    # optionally, create .ssh and add known_hosts
+RUN mkdir -p /root/.ssh && ssh-keyscan github.com >> /root/.ssh/known_hosts
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- \
@@ -44,6 +47,7 @@ FROM php:8.2-apache
 # Install required PHP extensions (runtime)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
+        git openssh-client \
         libpng-dev libjpeg-dev libfreetype6-dev \
         libzip-dev libicu-dev libxslt1-dev libxml2-dev \
         libonig-dev libevent-dev libssl-dev zlib1g-dev \
