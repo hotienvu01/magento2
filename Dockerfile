@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.3
+
 # -------------------------
 # Stage 1: build dependencies / install vendor via Composer
 # -------------------------
@@ -29,11 +31,13 @@ COPY composer.json composer.lock /app/
 # Use composer to install dependencies (no dev dependencies)
 # RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-scripts
 
-# Increase composer timeout globally and run install, use cache mount for composer cache
+# Increase composer timeout globally and run install
 RUN composer config --global process-timeout 2000 \
-    && composer config --global github-protocols https https \
-    && --mount=type=cache,target=/root/.composer/cache \
-       composer install --no-dev --prefer-dist --optimize-autoloader --no-scripts
+    && composer config --global github-protocols https https
+
+# use cache mount for composer cache
+RUN --mount=type=cache,target=/root/.composer/cache \
+    composer install --no-dev --prefer-dist --optimize-autoloader --no-scripts
 
 # Copy rest of code (Magento source, modules, etc.)
 COPY . /app
