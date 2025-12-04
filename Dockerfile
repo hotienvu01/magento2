@@ -14,7 +14,7 @@ RUN apt-get update \
         pdo_mysql mbstring gd zip intl bcmath soap xsl sockets ftp \
     && rm -rf /var/lib/apt/lists/*
 
-    # optionally, create .ssh and add known_hosts
+# optionally, create .ssh and add known_hosts
 RUN mkdir -p /root/.ssh && ssh-keyscan github.com >> /root/.ssh/known_hosts
 
 # Install Composer
@@ -29,9 +29,11 @@ COPY composer.json composer.lock /app/
 # Use composer to install dependencies (no dev dependencies)
 # RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-scripts
 
-# use cache mount for composer cache
-RUN --mount=type=cache,target=/root/.composer/cache \
-    composer install --no-dev --prefer-dist --optimize-autoloader --no-scripts
+# Increase composer timeout globally and run install, use cache mount for composer cache
+RUN composer config --global process-timeout 2000 \
+    && composer config --global github-protocols https https \
+    && --mount=type=cache,target=/root/.composer/cache \
+       composer install --no-dev --prefer-dist --optimize-autoloader --no-scripts
 
 # Copy rest of code (Magento source, modules, etc.)
 COPY . /app
