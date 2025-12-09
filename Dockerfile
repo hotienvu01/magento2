@@ -33,7 +33,8 @@ COPY composer.json composer.lock /app/
 
 # Increase composer timeout globally and run install
 RUN composer config --global process-timeout 2000 \
-    && composer config --global github-protocols https https
+    && composer config --global github-protocols https https \
+    && composer config -g repos.packagist composer http://192.168.1.10:30003/repository/php-proxy/
 
 # use cache mount for composer cache
 RUN --mount=type=cache,target=/root/.composer/cache \
