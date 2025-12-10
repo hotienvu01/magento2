@@ -34,7 +34,6 @@ COPY composer.json composer.lock /app/
 # Increase composer timeout globally and run install
 RUN composer config -g --unset repos.packagist
 RUN composer config -g repositories.nexus composer http://192.168.1.10:30003/repository/php-proxy/
-RUN composer config -g github-protocols []
 RUN composer config -g secure-http false
 RUN composer config -g --unset github-oauth.github.com
 RUN composer clear-cache
