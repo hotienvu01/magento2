@@ -38,6 +38,7 @@ RUN composer config -g secure-http false
 RUN composer config -g --unset github-oauth.github.com
 RUN composer config --global process-timeout 2000
 RUN composer config --global github-protocols https https
+RUN composer config -g github-oauth.github.com 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
 RUN composer clear-cache
 
 # RUN composer config --global process-timeout 2000 \
