@@ -36,6 +36,8 @@ RUN composer config -g --unset repos.packagist
 RUN composer config -g repositories.nexus composer http://192.168.1.10:30003/repository/php-proxy/
 RUN composer config -g secure-http false
 RUN composer config -g --unset github-oauth.github.com
+RUN composer config --global process-timeout 2000
+RUN composer config --global github-protocols https https
 RUN composer clear-cache
 
 # RUN composer config --global process-timeout 2000 \
