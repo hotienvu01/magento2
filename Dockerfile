@@ -25,33 +25,34 @@ RUN curl -sS https://getcomposer.org/installer | php -- \
 
 WORKDIR /app
 
-# Copy only composer metadata first — helps caching dependencies layer
-COPY composer.json composer.lock /app/
+# # Copy only composer metadata first — helps caching dependencies layer
+# COPY composer.json composer.lock /app/
 
-# Use composer to install dependencies (no dev dependencies)
-# RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-scripts
+# # Use composer to install dependencies (no dev dependencies)
+# # RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-scripts
 
-# Accept GITHUB_TOKEN as a build argument
-ARG GITHUB_TOKEN
+# # Accept GITHUB_TOKEN as a build argument
+# ARG GITHUB_TOKEN
 
-# Set the environment variable for Composer
-ENV GITHUB_TOKEN=${GITHUB_TOKEN}
+# # Set the environment variable for Composer
+# ENV GITHUB_TOKEN=${GITHUB_TOKEN}
 
-# Increase composer timeout globally and run install
-RUN composer config -g --unset repos.packagist
-RUN composer config -g repositories.nexus composer http://192.168.1.10:30003/repository/php-proxy/
-RUN composer config -g process-timeout 2000
-RUN composer config -g github-protocols https https
-RUN composer config -g github-oauth.github.com ${GITHUB_TOKEN}
-RUN composer config -g repo.packagist composer https://packagist.org
-RUN composer clear-cache
+# # Increase composer timeout globally and run install
+# RUN composer config -g --unset repos.packagist
+# RUN composer config -g repositories.nexus composer http://192.168.1.10:30003/repository/php-proxy/
+# RUN composer config -g process-timeout 2000
+# RUN composer config -g github-protocols https https
+# RUN composer config -g github-oauth.github.com ${GITHUB_TOKEN}
+# RUN composer config -g repo.packagist composer https://packagist.org
+# RUN composer clear-cache
 
 # RUN composer config --global process-timeout 2000 \
 #     && composer config --global github-protocols https https \
 #     && composer config -g repos.packagist composer http://192.168.1.10:30003/repository/php-proxy/
 
 # use cache mount for composer cache
-RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-scripts --optimize-autoloader --no-interaction
+#RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-scripts --optimize-autoloader --no-interaction
+RUN composer install
 
 # Copy rest of code (Magento source, modules, etc.)
 COPY . /app
