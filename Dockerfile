@@ -31,12 +31,15 @@ COPY composer.json composer.lock /app/
 # Use composer to install dependencies (no dev dependencies)
 # RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-scripts
 
+# Accept GITHUB_TOKEN as a build argument
+ARG GITHUB_TOKEN
+
 # Increase composer timeout globally and run install
 RUN composer config -g --unset repos.packagist
 RUN composer config -g repositories.nexus composer http://192.168.1.10:30003/repository/php-proxy/
 RUN composer config --global process-timeout 2000
 RUN composer config --global github-protocols https https
-RUN composer config -g github-oauth.github.com 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
+RUN composer config -g github-oauth.github.com $GITHUB_TOKEN
 RUN composer clear-cache
 
 # RUN composer config --global process-timeout 2000 \
