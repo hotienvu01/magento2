@@ -51,7 +51,7 @@ RUN composer clear-cache
 #     && composer config -g repos.packagist composer http://192.168.1.10:30003/repository/php-proxy/
 
 # use cache mount for composer cache
-RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-scripts --optimize-autoloader --no-interaction --disable-tls
+RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-scripts --optimize-autoloader --no-interaction
 
 # Copy rest of code (Magento source, modules, etc.)
 COPY . /app
