@@ -34,12 +34,15 @@ COPY composer.json composer.lock /app/
 # Accept GITHUB_TOKEN as a build argument
 ARG GITHUB_TOKEN
 
+# Set the environment variable for Composer
+ENV GITHUB_TOKEN=${GITHUB_TOKEN}
+
 # Increase composer timeout globally and run install
 RUN composer config -g --unset repos.packagist
 RUN composer config -g repositories.nexus composer http://192.168.1.10:30003/repository/php-proxy/
 RUN composer config --global process-timeout 2000
 RUN composer config --global github-protocols https https
-RUN composer config -g github-oauth.github.com $GITHUB_TOKEN
+RUN composer config -g github-oauth.github.com ${GITHUB_TOKEN}
 RUN composer clear-cache
 
 # RUN composer config --global process-timeout 2000 \
