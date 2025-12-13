@@ -43,6 +43,7 @@ RUN composer config -g repositories.nexus composer http://192.168.1.10:30003/rep
 RUN composer config --global process-timeout 2000
 RUN composer config --global github-protocols https https
 RUN composer config -g github-oauth.github.com ${GITHUB_TOKEN}
+RUN composer config -g repo.packagist composer https://packagist.org
 RUN composer clear-cache
 
 # RUN composer config --global process-timeout 2000 \
