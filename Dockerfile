@@ -40,8 +40,8 @@ ENV GITHUB_TOKEN=${GITHUB_TOKEN}
 # Increase composer timeout globally and run install
 RUN composer config -g --unset repos.packagist
 RUN composer config -g repositories.nexus composer http://192.168.1.10:30003/repository/php-proxy/
-RUN composer config --global process-timeout 2000
-RUN composer config --global github-protocols https https
+RUN composer config -g process-timeout 2000
+RUN composer config -g github-protocols https https
 RUN composer config -g github-oauth.github.com ${GITHUB_TOKEN}
 RUN composer config -g repo.packagist composer https://packagist.org
 RUN composer clear-cache
@@ -51,8 +51,7 @@ RUN composer clear-cache
 #     && composer config -g repos.packagist composer http://192.168.1.10:30003/repository/php-proxy/
 
 # use cache mount for composer cache
-RUN --mount=type=cache,target=/root/.composer/cache \
-    composer install --no-dev --prefer-dist --optimize-autoloader --no-scripts
+RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-scripts --optimize-autoloader --no-interaction --disable-tls
 
 # Copy rest of code (Magento source, modules, etc.)
 COPY . /app
