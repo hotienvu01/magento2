@@ -30,6 +30,8 @@ RUN composer config -g preferred-install dist \
  && composer config -g process-timeout 2000 \
  && composer config -g github-protocols https
 
+ENV COMPOSER_PROCESS_TIMEOUT=2000
+
 WORKDIR /var/www/html
 
 # Copy only composer files (better caching)
@@ -42,8 +44,7 @@ RUN if [ -n "$GITHUB_TOKEN" ]; then \
     fi
 
 # Optional internal Nexus proxy
-RUN composer config -g repos.packagist composer false \
- && composer config -g repositories.nexus composer http://192.168.1.10:30003/repository/php-proxy/ \
+RUN composer config -g repos.packagist composer https://packagist.org \
  || true
 
 # Composer install with cache
