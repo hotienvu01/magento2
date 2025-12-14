@@ -26,7 +26,7 @@ RUN mkdir -p /root/.ssh \
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Composer global config
-RUN composer config -g preferred-install source \
+RUN composer config -g preferred-install dist \
  && composer config -g process-timeout 2000 \
  && composer config -g github-protocols https
 
@@ -51,7 +51,7 @@ RUN --mount=type=cache,target=/root/.composer/cache \
     composer install \
         --no-dev \
         --no-interaction \
-        --prefer-source \
+        --prefer-dist \
         --no-progress
 
 # Copy full Magento source
