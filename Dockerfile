@@ -31,7 +31,8 @@ RUN composer config -g repos.packagist composer false \
  && composer config -g repositories.nexus composer http://192.168.1.10:30003/repository/php-proxy/ \
  && composer config -g preferred-install dist \
  && composer config -g process-timeout 2000 \
- && composer config -g --unset github-oauth.github.com
+ && composer config -g --unset github-oauth.github.com \
+ && composer config -g secure-http false
 
 
 #ENvironment
@@ -59,6 +60,7 @@ RUN if [ -n "$GITHUB_TOKEN" ]; then \
 #     http://192.168.1.10:30003/repository/php-proxy
 
 #RUN curl -I https://api.github.com/repos/php-http/discovery/zipball/82fe4c73ef3363caed49ff8dd1539ba06044910d
+RUN curl -I https://objects.githubusercontent.com
 
 # Composer install with cache
 RUN --mount=type=cache,target=/root/.composer/cache \
