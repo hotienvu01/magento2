@@ -44,14 +44,16 @@ RUN if [ -n "$GITHUB_TOKEN" ]; then \
     fi
 
 # Optional internal Nexus proxy
-RUN composer config -g repos.packagist composer https://packagist.org \
- || true
+RUN composer config -g repos.packagist composer false \
+ && composer config -g repositories.nexus composer \
+    http://192.168.1.10:30003/repository/php-proxy
 
-RUN curl -I https://api.github.com/repos/php-http/discovery/zipball/82fe4c73ef3363caed49ff8dd1539ba06044910d
+#RUN curl -I https://api.github.com/repos/php-http/discovery/zipball/82fe4c73ef3363caed49ff8dd1539ba06044910d
 
 # Composer install with cache
 RUN --mount=type=cache,target=/root/.composer/cache \
     composer install \
+        -vvv \
         --no-dev \
         --no-interaction \
         --prefer-dist \
