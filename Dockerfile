@@ -47,6 +47,8 @@ RUN if [ -n "$GITHUB_TOKEN" ]; then \
 RUN composer config -g repos.packagist composer https://packagist.org \
  || true
 
+RUN curl -I https://api.github.com/repos/php-http/discovery/zipball/82fe4c73ef3363caed49ff8dd1539ba06044910d
+
 # Composer install with cache
 RUN --mount=type=cache,target=/root/.composer/cache \
     composer install \
