@@ -1,94 +1,86 @@
-# syntax=docker/dockerfile:1.3
+# syntax=docker/dockerfile:1.6
 
-# -------------------------
-# Stage 1: build dependencies / install vendor via Composer
-# -------------------------
-FROM php:8.2-cli AS builder
+################################
+# Stage 1: Composer / build
+################################
+FROM php:8.2-fpm AS builder
 
-# Install system dependencies and PHP extensions required to build & run Magento
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        git unzip curl openssh-client \
-        libpng-dev libjpeg-dev libfreetype6-dev \
-        libzip-dev libicu-dev libxslt1-dev libxml2-dev \
-        libonig-dev libevent-dev libssl-dev zlib1g-dev \
+# System deps for Magento + Composer
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    unzip \
+    curl \
+    openssh-client \
+    libpng-dev libjpeg-dev libfreetype6-dev \
+    libzip-dev libicu-dev libxslt1-dev libxml2-dev \
+    libonig-dev libevent-dev libssl-dev zlib1g-dev \
     && docker-php-ext-install \
         pdo_mysql mbstring gd zip intl bcmath soap xsl sockets ftp \
     && rm -rf /var/lib/apt/lists/*
 
-# optionally, create .ssh and add known_hosts
-RUN mkdir -p /root/.ssh && ssh-keyscan github.com >> /root/.ssh/known_hosts
+# SSH for private repos (safe even if unused)
+RUN mkdir -p /root/.ssh \
+ && ssh-keyscan github.com >> /root/.ssh/known_hosts
 
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- \
-    --install-dir=/usr/local/bin --filename=composer
+# Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-WORKDIR /app
+# Composer global config
+RUN composer config -g preferred-install source \
+ && composer config -g process-timeout 2000 \
+ && composer config -g github-protocols https
 
-# Copy only composer metadata first — helps caching dependencies layer
-COPY composer.json composer.lock /app/
+WORKDIR /var/www/html
 
-# Use composer to install dependencies (no dev dependencies)
-# RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-scripts
+# Copy only composer files (better caching)
+COPY composer.json composer.lock ./
 
-# Accept GITHUB_TOKEN as a build argument
+# GitHub token for rate limits
 ARG GITHUB_TOKEN
+RUN if [ -n "$GITHUB_TOKEN" ]; then \
+      composer config -g github-oauth.github.com "$GITHUB_TOKEN"; \
+    fi
 
-# Set the environment variable for Composer
-ENV GITHUB_TOKEN=${GITHUB_TOKEN}
+# Optional internal Nexus proxy
+RUN composer config -g repos.packagist composer false \
+ && composer config -g repositories.nexus composer http://192.168.1.10:30003/repository/php-proxy/ \
+ || true
 
-# Increase composer timeout globally and run install
-RUN composer config -g --unset repos.packagist
-RUN composer config -g repositories.nexus composer http://192.168.1.10:30003/repository/php-proxy/
-RUN composer config -g process-timeout 2000
-RUN composer config -g github-protocols https https
-RUN composer config -g github-oauth.github.com ${GITHUB_TOKEN}
-RUN composer config -g repo.packagist composer https://packagist.org
-RUN composer clear-cache
+# Composer install with cache
+RUN --mount=type=cache,target=/root/.composer/cache \
+    composer install \
+        --no-dev \
+        --no-interaction \
+        --prefer-source \
+        --no-progress
 
-# RUN composer config --global process-timeout 2000 \
-#     && composer config --global github-protocols https https \
-#     && composer config -g repos.packagist composer http://192.168.1.10:30003/repository/php-proxy/
+# Copy full Magento source
+COPY . .
 
-# use cache mount for composer cache
-#RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-scripts --optimize-autoloader --no-interaction
-RUN composer install
-
-# Copy rest of code (Magento source, modules, etc.)
-COPY . /app
-
-# Optionally — if your build requires Magento commands (like di compile / static content), you can run them here
-# e.g. RUN php bin/magento setup:di:compile && php bin/magento setup:static-content:deploy -f
-
-# -------------------------
-# Stage 2: final image with Apache + PHP
-# -------------------------
+################################
+# Stage 2: Runtime (Apache)
+################################
 FROM php:8.2-apache
 
-# Install required PHP extensions (runtime)
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        git openssh-client \
-        libpng-dev libjpeg-dev libfreetype6-dev \
-        libzip-dev libicu-dev libxslt1-dev libxml2-dev \
-        libonig-dev libevent-dev libssl-dev zlib1g-dev \
+# Runtime deps only (NO git)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpng-dev libjpeg-dev libfreetype6-dev \
+    libzip-dev libicu-dev libxslt1-dev libxml2-dev \
+    libonig-dev libevent-dev libssl-dev zlib1g-dev \
     && docker-php-ext-install \
         pdo_mysql mbstring gd zip intl bcmath soap xsl sockets ftp \
     && rm -rf /var/lib/apt/lists/*
 
-# Enable Apache rewrite module (needed for Magento)
 RUN a2enmod rewrite
 
 WORKDIR /var/www/html
 
-# Copy built application + vendor from builder
-COPY --from=builder /app /var/www/html
+# Copy app from builder
+COPY --from=builder /var/www/html /var/www/html
 
-# (Optional) set proper permissions for web server user
+# Magento permissions
 RUN chown -R www-data:www-data /var/www/html \
-    && find var pub/static pub/media generated -type d -exec chmod 775 {} + \
-    && find var pub/static pub/media generated -type f -exec chmod 664 {} +
+ && chmod -R 775 var pub/static pub/media generated
 
 EXPOSE 80
-
 CMD ["apache2-foreground"]
