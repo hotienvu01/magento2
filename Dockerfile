@@ -26,11 +26,21 @@ RUN mkdir -p /root/.ssh \
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Composer global config
-RUN composer config -g preferred-install dist \
+# Force Nexus ONLY
+RUN composer config -g repos.packagist composer false \
+ && composer config -g repositories.nexus composer http://192.168.1.10:30003/repository/php-proxy/ \
+ && composer config -g preferred-install dist \
  && composer config -g process-timeout 2000 \
- && composer config -g github-protocols https
+ && composer config -g --unset github-oauth.github.com
 
+
+#ENvironment
 ENV COMPOSER_PROCESS_TIMEOUT=2000
+ENV COMPOSER_DISABLE_NETWORK=0
+ENV COMPOSER_NO_INTERACTION=1
+ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV COMPOSER_PREFER_DIST=1
+ENV COMPOSER_USE_INCLUDE_PATH=0
 
 WORKDIR /var/www/html
 
@@ -44,20 +54,21 @@ RUN if [ -n "$GITHUB_TOKEN" ]; then \
     fi
 
 # Optional internal Nexus proxy
-RUN composer config -g repos.packagist composer false \
- && composer config -g repositories.nexus composer \
-    http://192.168.1.10:30003/repository/php-proxy
+# RUN composer config -g repos.packagist composer false \
+#  && composer config -g repositories.nexus composer \
+#     http://192.168.1.10:30003/repository/php-proxy
 
 #RUN curl -I https://api.github.com/repos/php-http/discovery/zipball/82fe4c73ef3363caed49ff8dd1539ba06044910d
 
 # Composer install with cache
 RUN --mount=type=cache,target=/root/.composer/cache \
-    composer install \
-        -vvv \
-        --no-dev \
-        --no-interaction \
-        --prefer-dist \
-        --no-progress
+    composer config -g process-timeout 2000 \
+    && composer install \
+      --no-dev \
+      --prefer-dist \
+      --no-progress \
+      --no-scripts \
+      --no-interaction
 
 # Copy full Magento source
 COPY . .
