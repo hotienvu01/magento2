@@ -29,7 +29,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Force Nexus ONLY
 RUN composer config -g repos.packagist composer false \
  && composer config -g repositories.nexus composer http://192.168.1.10:30003/repository/php-proxy/ \
- && composer config -g preferred-install dist \
+ && composer config -g preferred-install source \
  && composer config -g process-timeout 2000 \
  && composer config -g --unset github-oauth.github.com \
  && composer config -g secure-http false
@@ -42,6 +42,8 @@ ENV COMPOSER_NO_INTERACTION=1
 ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV COMPOSER_PREFER_DIST=1
 ENV COMPOSER_USE_INCLUDE_PATH=0
+ENV COMPOSER_HTTP_TIMEOUT=600
+ENV CURL_HTTP_VERSION=1.1
 
 WORKDIR /var/www/html
 
