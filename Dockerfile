@@ -27,12 +27,19 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Composer global config
 # Force Nexus ONLY
-RUN composer config -g repos.packagist composer false \
- && composer config -g repositories.nexus composer http://192.168.1.10:30003/repository/php-proxy/ \
- && composer config -g preferred-install source \
- && composer config -g process-timeout 2000 \
+# RUN composer config -g repositories.nexus composer http://192.168.1.10:30003/repository/php-proxy/ \
+#  && composer config -g preferred-install source \
+#  && composer config -g process-timeout 2000 \
+#  && composer config -g --unset github-oauth.github.com \
+#  && composer config -g secure-http false
+
+# Configure Composer for HTTP Nexus
+RUN composer config -g process-timeout 2000 \
+ && composer config -g secure-http false \
+ && composer config -g repos.packagist composer false \
+ && composer config -g repos.nexus composer http://192.168.1.10:30003/repository/php-proxy/ \
  && composer config -g --unset github-oauth.github.com \
- && composer config -g secure-http false
+ && if [ -n "$GITHUB_TOKEN" ]; then composer config -g github-oauth.github.com "$GITHUB_TOKEN"; fi
 
 
 #ENvironment
@@ -62,7 +69,13 @@ RUN if [ -n "$GITHUB_TOKEN" ]; then \
 #     http://192.168.1.10:30003/repository/php-proxy
 
 #RUN curl -I https://api.github.com/repos/php-http/discovery/zipball/82fe4c73ef3363caed49ff8dd1539ba06044910d
-RUN curl -I https://objects.githubusercontent.com
+RUN curl -I https://objects.githubusercontent.com || true
+RUN curl -I https://api.github.com || true
+RUN curl -I https://packagist.org || true
+
+#Debug in Docker build
+RUN composer config --list --global
+RUN composer config --list --show-origin
 
 # Composer install with cache
 RUN --mount=type=cache,target=/root/.composer/cache \
