@@ -15,6 +15,8 @@ spec:
       labels:
         app: kyosm-ec-web
     spec:
+      securityContext:
+        fsGroup: 33
       containers:
         - name: kyosm-container
           image: 192.168.1.10:30004/kyosm-ec-web:latest  # replace with ${IMAGE_PATH}:${IMAGE_TAG} in pipeline
@@ -29,7 +31,7 @@ spec:
               memory: "2Gi"      # request 2 GiB RAM
             limits:
               cpu: "2"           # optionally cap at 2 cores (or higher if you want burst)
-              memory: "2Gi"      # cap at 4 GiB RAM
+              memory: "4Gi"      # cap at 4 GiB RAM
           volumeMounts:
             - name: magento-storage
               mountPath: /var/www/html/var

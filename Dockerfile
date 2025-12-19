@@ -105,6 +105,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         pdo_mysql mbstring gd zip intl bcmath soap xsl sockets ftp \
     && rm -rf /var/lib/apt/lists/*
 
+# Change Apache DocumentRoot to /pub
+RUN sed -i 's#/var/www/html#/var/www/html/pub#g' \
+    /etc/apache2/sites-available/000-default.conf \
+    /etc/apache2/apache2.conf
+
+# Allow .htaccess (Magento requires this)
+RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' \
+    /etc/apache2/apache2.conf
+
 RUN a2enmod rewrite
 
 WORKDIR /var/www/html
