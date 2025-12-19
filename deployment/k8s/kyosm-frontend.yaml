@@ -35,6 +35,7 @@ spec:
           volumeMounts:
             - name: magento-storage
               mountPath: /var/www/html
+              subPath: html
             - name: kyosm-config
               mountPath: /etc/apache2/sites-available/000-default.conf
               subPath: 000-default.conf
