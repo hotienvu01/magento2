@@ -96,13 +96,33 @@ COPY . .
 ################################
 FROM php:8.2-apache
 
-# Runtime deps only (NO git)
+# Runtime deps only (NO git) & GD dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpng-dev libjpeg-dev libfreetype6-dev \
-    libzip-dev libicu-dev libxslt1-dev libxml2-dev \
-    libonig-dev libevent-dev libssl-dev zlib1g-dev \
-    && docker-php-ext-install \
-        pdo_mysql mbstring gd zip intl bcmath soap xsl sockets ftp \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    libicu-dev \
+    libxslt1-dev \
+    libxml2-dev \
+    libonig-dev \
+    libevent-dev \
+    libssl-dev \
+    zlib1g-dev \
+    && docker-php-ext-configure gd \
+        --with-freetype \
+        --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
+        gd \
+        pdo_mysql \
+        mbstring \
+        zip \
+        intl \
+        bcmath \
+        soap \
+        xsl \
+        sockets \
+        ftp \
     && rm -rf /var/lib/apt/lists/*
 
 # # Change Apache DocumentRoot to /pub
