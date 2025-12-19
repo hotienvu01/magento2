@@ -105,14 +105,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         pdo_mysql mbstring gd zip intl bcmath soap xsl sockets ftp \
     && rm -rf /var/lib/apt/lists/*
 
-# Change Apache DocumentRoot to /pub
-RUN sed -i 's#/var/www/html#/var/www/html/pub#g' \
-    /etc/apache2/sites-available/000-default.conf \
-    /etc/apache2/apache2.conf
+# # Change Apache DocumentRoot to /pub
+# RUN sed -i 's#/var/www/html#/var/www/html/pub#g' /etc/apache2/sites-available/000-default.conf
 
-# Allow .htaccess (Magento requires this)
-RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' \
-    /etc/apache2/apache2.conf
+# # Allow .htaccess (Magento requires this)
+# RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' \
+#     /etc/apache2/apache2.conf
 
 RUN a2enmod rewrite
 
@@ -121,9 +119,13 @@ WORKDIR /var/www/html
 # Copy app from builder
 COPY --from=builder /var/www/html /var/www/html
 
-# Magento permissions
+# Ensure Apache DocumentRoot points to /pub
+RUN sed -i 's#/var/www/html#/var/www/html/pub#g' /etc/apache2/sites-available/000-default.conf
+
+# Ensure proper permissions
 RUN chown -R www-data:www-data /var/www/html \
- && chmod -R 775 var pub/static pub/media generated
+ && find var pub/static pub/media generated -type d -exec chmod 775 {} \; \
+ && find var pub/static pub/media generated -type f -exec chmod 664 {} \;
 
 EXPOSE 80
 CMD ["apache2-foreground"]
