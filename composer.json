@@ -16,6 +16,13 @@
         "preferred-install": "dist",
         "sort-packages": true
     },
+    "repositories": {
+        "packagist": false,
+        "nexus": {
+            "type": "composer",
+            "url": "http://192.168.1.10:30003/repository/php-proxy/"
+        }
+    },
     "version": "2.4.8",
     "require": {
         "php": "~8.2.0||~8.3.0||~8.4.0",
