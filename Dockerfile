@@ -36,7 +36,6 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Configure Composer for HTTP Nexus
 RUN composer config -g process-timeout 2000 \
  && composer config -g secure-http false \
- && composer config -g repos.packagist composer false \
  && composer config -g repos.nexus composer http://192.168.1.10:30003/repository/php-proxy/ \
  && composer config -g --unset github-oauth.github.com \
  && if [ -n "$GITHUB_TOKEN" ]; then composer config -g github-oauth.github.com "$GITHUB_TOKEN"; fi
