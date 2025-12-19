@@ -34,8 +34,16 @@ spec:
               memory: "4Gi"      # cap at 4 GiB RAM
           volumeMounts:
             - name: magento-storage
-              mountPath: /var/www/html
-              subPath: html
+              mountPath: /var/www/html/var
+              subPath: var
+
+            - name: magento-storage
+              mountPath: /var/www/html/pub/media
+              subPath: media
+
+            - name: magento-storage
+              mountPath: /var/www/html/generated
+              subPath: generated
             - name: kyosm-config
               mountPath: /etc/apache2/sites-available/000-default.conf
               subPath: 000-default.conf
