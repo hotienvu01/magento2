@@ -53,9 +53,6 @@ ENV CURL_HTTP_VERSION=1.1
 
 WORKDIR /var/www/html
 
-# Copy only composer files (better caching)
-COPY composer.json composer.lock ./
-
 # GitHub token for rate limits
 ARG GITHUB_TOKEN
 RUN if [ -n "$GITHUB_TOKEN" ]; then \
@@ -76,9 +73,14 @@ RUN if [ -n "$GITHUB_TOKEN" ]; then \
 # RUN composer config --list --global
 # RUN composer config --list --show-origin
 
+# Copy Magento skeleton needed by Composer plugins
+COPY app/ app/
+
+# Copy only composer files (better caching)
+COPY composer.json composer.lock ./
+
 # Composer install with cache
 RUN --mount=type=cache,target=/root/.composer/cache \
-    composer config -g process-timeout 2000 \
     && composer install \
       --no-dev \
       --prefer-dist \
