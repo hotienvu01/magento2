@@ -81,7 +81,7 @@ COPY composer.json composer.lock ./
 
 # Composer install with cache
 RUN --mount=type=cache,target=/root/.composer/cache \
-    && composer install \
+    composer install \
       --no-dev \
       --prefer-dist \
       --no-progress \
