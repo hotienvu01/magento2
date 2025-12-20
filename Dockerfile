@@ -175,7 +175,7 @@ RUN bin/magento setup:install \
     --elasticsearch-port=30015 
 
 RUN bin/magento config:set web/admin/url http://192.168.1.10:32767/admin
-RUN bin/magento module:enable Magento_Backend
+# RUN bin/magento module:enable Magento_Backend
 RUN bin/magento cache:flush
 
 EXPOSE 80
