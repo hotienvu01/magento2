@@ -34,18 +34,18 @@ spec:
               memory: "4Gi"      # cap at 4 GiB RAM
           volumeMounts:
             - name: magento-storage
-              mountPath: /var/www/html/var
+              mountPath: /var/www/html/var # Magento's temporary and cache files (e.g., logs, session data, and other application-specific caches)
               subPath: var
 
             - name: magento-storage
-              mountPath: /var/www/html/pub/media
+              mountPath: /var/www/html/pub/media # Store user-uploaded files such as product images, media content, and other files that users interact with
               subPath: media
 
             - name: magento-storage
-              mountPath: /var/www/html/generated
+              mountPath: /var/www/html/generated # Contains auto-generated code for Magento, including proxies, interceptors, and factory classes
               subPath: generated
             - name: kyosm-config
-              mountPath: /etc/apache2/sites-available/000-default.conf
+              mountPath: /etc/apache2/sites-available/000-default.conf # Navigate url from the root path to pub folder
               subPath: 000-default.conf
       volumes:
         - name: magento-storage

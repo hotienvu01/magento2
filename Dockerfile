@@ -79,6 +79,8 @@ COPY app/ app/
 # Copy only composer files (better caching)
 COPY composer.json composer.lock ./
 
+RUN composer require magento/theme-frontend-luma
+
 # Composer install with cache
 RUN --mount=type=cache,target=/root/.composer/cache \
     composer install \
@@ -170,7 +172,11 @@ RUN bin/magento setup:install \
     --use-rewrites=1 \
     --search-engine=elasticsearch8 \
     --elasticsearch-host=192.168.1.10 \
-    --elasticsearch-port=30015
+    --elasticsearch-port=30015 
+
+RUN bin/magento config:set web/admin/url http://192.168.1.10:32767/admin
+RUN bin/magento module:enable Magento_Backend
+RUN bin/magento cache:flush
 
 EXPOSE 80
 CMD ["apache2-foreground"]
