@@ -150,6 +150,8 @@ RUN chown -R www-data:www-data /var/www/html \
 # Edit php.ini settings (Increase memory limit, etc.)
 RUN echo "memory_limit = 4G" >> /usr/local/etc/php/conf.d/99-custom.ini
 
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+
 # Magento Setup Install Command (Run this after the dependencies are copied)
 RUN bin/magento setup:install \
     --base-url=http://192.168.1.10:32767/ \
