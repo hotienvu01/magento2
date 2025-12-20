@@ -147,5 +147,28 @@ RUN chown -R www-data:www-data /var/www/html \
  && find var pub/static pub/media generated -type d -exec chmod 775 {} \; \
  && find var pub/static pub/media generated -type f -exec chmod 664 {} \;
 
+# Edit php.ini settings (Increase memory limit, etc.)
+RUN echo "memory_limit = 4G" >> /usr/local/etc/php/conf.d/99-custom.ini
+
+# Magento Setup Install Command (Run this after the dependencies are copied)
+RUN bin/magento setup:install \
+    --base-url=http://192.168.1.10:32767/ \
+    --db-host=192.168.1.10:32594 \
+    --db-name=kyosm \
+    --db-user=kyosm.admin \
+    --db-password=7jnS0PI2zC \
+    --admin-firstname=Admin \
+    --admin-lastname=User \
+    --admin-email=hotienvu01@gmail.com \
+    --admin-user=admin \
+    --admin-password=kyosm2025! \
+    --language=en_US \
+    --currency=USD \
+    --timezone=UTC \
+    --use-rewrites=1 \
+    --search-engine=elasticsearch8 \
+    --elasticsearch-host=192.168.1.10 \
+    --elasticsearch-port=30015
+
 EXPOSE 80
 CMD ["apache2-foreground"]
