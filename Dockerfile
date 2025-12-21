@@ -172,9 +172,14 @@ RUN bin/magento setup:install \
     --elasticsearch-host=192.168.1.10 \
     --elasticsearch-port=30015 
 
-RUN bin/magento config:set web/admin/url http://192.168.1.10:32767/admin
+# RUN bin/magento config:set web/admin/url http://192.168.1.10:32767/admin
 RUN bin/magento module:enable Magento_Backend
+RUN bin/magento setup:config:set --backend-frontname="cms_admin"
+
 RUN bin/magento cache:flush
+
+# Display admin url, please run kubectl exec -it kyosm-ec-web-6887f9c7c4-xt6cs -n customer-service -- bash
+RUN bin/magento info:adminuri
 
 EXPOSE 80
 CMD ["apache2-foreground"]
